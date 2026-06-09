@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A Little Journey</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: #000;
+  color: white;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* STAR BACKGROUND */
+body::before {
+  content: "";
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(white 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.25;
+  animation: stars 60s linear infinite;
+  z-index: 0;
+}
+
+@keyframes stars {
+  from {transform: translateY(0);}
+  to {transform: translateY(-1000px);}
+}
+
+/* SCREEN SYSTEM */
+.screen {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.active {
+  display: block;
+  animation: fade 0.8s ease;
+}
+
+@keyframes fade {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+h1, h2 { margin-top: 60px; }
+
+p {
+  max-width: 600px;
+  margin: 10px auto;
+  line-height: 1.6;
+}
+
+/* BUTTONS */
+button {
+  padding: 12px 22px;
+  margin: 12px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+}
+
+.yes {
+  background: #ff4da6;
+  color: white;
+}
+
+.no {
+  background: #444;
+  color: white;
+  position: relative;
+}
+
+/* FLOATING ELEMENTS */
+.float {
+  position: fixed;
+  font-size: 20px;
+  pointer-events: none;
+  animation: rise 6s linear forwards;
+}
+
+@keyframes rise {
+  from {transform: translateY(0); opacity: 1;}
+  to {transform: translateY(-700px); opacity: 0;}
+}
+
+/* FIREWORKS */
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="fx"></canvas>
+
+<!-- SCREEN 1 -->
+<div class="screen active" id="s1">
+<h1>✨ A Little Journey ✨</h1>
+<p>Some people enter life quietly…</p>
+<p>but stay forever in memory.</p>
+<button onclick="go(1)">Begin</button>
+</div>
+
+<!-- SCREEN 2 -->
+<div class="screen" id="s2">
+<h2>💌 First Letter</h2>
+<p>A simple bond slowly turned into something special.</p>
+<button onclick="go(2)">Next</button>
+</div>
+
+<!-- SCREEN 3 -->
+<div class="screen" id="s3">
+<h2>💖 Second Letter</h2>
+<p>I hope this bond only grows with time.</p>
+<button onclick="go(3)">Next</button>
+</div>
+
+<!-- QUESTION 1 -->
+<div class="screen" id="s4">
+<h2>❤️ One Question</h2>
+<p>Will you be my best friend?</p>
+
+<button class="yes" onclick="yes1()">YES</button>
+<button class="no" onclick="run(this)">NO</button>
+</div>
+
+<!-- AFTER YES -->
+<div class="screen" id="s5">
+<h2>✨ Thank You ✨</h2>
+<p>This means a lot.</p>
+<button onclick="go(5)">Next</button>
+</div>
+
+<!-- FINAL -->
+<div class="screen" id="s6">
+<h2>🌹 Final Promise</h2>
+<p>Will we always stay connected?</p>
+
+<button class="yes" onclick="finalYes()">YES</button>
+<button class="no" onclick="run(this)">NO</button>
+</div>
+
+<!-- END -->
+<div class="screen" id="s7">
+<h1>🎉 We Did It 🎉</h1>
+<p>Some bonds don’t fade.</p>
+<p>They stay forever.</p>
+<p style="font-size:18px;">❤️ Always connected ❤️</p>
+</div>
+
+<script>
+let current = 1;
+
+function go(n){
+  document.querySelector(".active").classList.remove("active");
+  document.getElementById("s"+(n+2)).classList.add("active");
+}
+
+/* YES FLOW */
+function yes1(){
+  go(3);
+}
+
+/* FINAL YES */
+function finalYes(){
+  go(5);
+  fireworks();
+  hearts();
+}
+
+/* NO RUN AWAY */
+function run(btn){
+  btn.style.position = "absolute";
+  btn.style.top = Math.random()*80 + "%";
+  btn.style.left = Math.random()*80 + "%";
+}
+
+/* FLOATING HEARTS (LIMITED FOR PERFORMANCE) */
+function hearts(){
+  setInterval(()=>{
+    let h = document.createElement("div");
+    h.className = "float";
+    h.innerHTML = "❤️";
+    h.style.left = Math.random()*100 + "%";
+    h.style.top = "90%";
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),6000);
+  },500);
+}
+
+/* FIREWORKS (LIGHTWEIGHT) */
+const canvas = document.getElementById("fx");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let particles = [];
+
+function burst(){
+  for(let i=0;i<30;i++){
+    particles.push({
+      x: canvas.width/2,
+      y: canvas.height/2,
+      vx:(Math.random()-0.5)*5,
+      vy:(Math.random()-0.5)*5,
+      a:1
+    });
+  }
+}
+
+function fireworks(){
+  setInterval(burst,1200);
+  draw();
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach((p,i)=>{
+    p.x += p.vx;
+    p.y += p.vy;
+    p.a -= 0.015;
+
+    ctx.fillStyle = `rgba(255,105,180,${p.a})`;
+    ctx.fillRect(p.x,p.y,2,2);
+
+    if(p.a <= 0) particles.splice(i,1);
+  });
+
+  requestAnimationFrame(draw);
+}
+</script>
+
+</body>
+</html>
